@@ -16,7 +16,7 @@ class Client:
 
 def manager(client):
 
-    print "Accepted connection from: ", client.addr
+    print client.code + " conectado desde: ", client.addr
 
     # Este bucle se repite cada vez que se encuentran datos en el bufer
     while 1:
@@ -28,15 +28,15 @@ def manager(client):
             # clientes
             for c in SOCKET_LIST:
                 # a los clientes enviamos la actual del cliente lol
-                if not c.socket.send(client.code + " " + str(data)):
+                if not c.socket.send(client.code + ": " + str(data)):
                     try:
                         c.socket.close()
                     finally:
                         SOCKET_LIST.remove(c)
-                        print "Client " + c.code + " not found - Socket closed"
+                        print "Cliente " + c.code + " no encontrado - Socket cerrado"
                         break
 
-            print "Total clients: " + str(len(SOCKET_LIST))
+            print "Clientes totales: " + str(len(SOCKET_LIST))
 
         except Exception as e:
             print "Excepcion en socket de cliente:"
@@ -45,7 +45,7 @@ def manager(client):
                 client.socket.close()
             finally:
                 SOCKET_LIST.remove(client)
-                print "Client " + client.code + " not found - Socket closed - Total clients: " + str(len(SOCKET_LIST))
+                print "Cliente " + client.code + " no encontrado - Socket cerrado - Clientes totales: " + str(len(SOCKET_LIST))
                 break
     return
 
@@ -62,13 +62,11 @@ def server():
     while 1:
 
         c = Client()
-        c.code = str(uuid.uuid4().fields[-1])[:5]
-
         c.socket, c.addr = server_socket.accept()
-
+        c.code = c.socket.recv(RECV_BUFFER)
         SOCKET_LIST.append(c)
 
-        thread.start_new_thread(manager, (c,))
+        thread.start_new_thread(manager, (SOCKET_LIST[-1],))
 
     server_socket.close()
 
