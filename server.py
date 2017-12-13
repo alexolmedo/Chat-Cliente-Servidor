@@ -23,11 +23,23 @@ def manager(client):
 
         try:
             data = client.socket.recv(RECV_BUFFER)
+            #Comprobar si se trata de un mensaje privado
+            if ':' in str(data):
+                recipient, msg = data.split(":")
+                for c in SOCKET_LIST:
+                     if c.code == recipient:
+                        if not c.socket.send(client.code + ": " + msg):
+                            try:
+                                c.socket.close()
+                            finally:
+                                SOCKET_LIST.remove(c)
+                                print "Cliente " + c.code + " no encontrado - Socket cerrado"
+                                break
+                break
 
             # Hacemos un broadcast de lo que dice el cliente a todos los demás
             # clientes
             for c in SOCKET_LIST:
-                # a los clientes enviamos la actual del cliente lol
                 if not c.socket.send(client.code + ": " + str(data)):
                     try:
                         c.socket.close()
