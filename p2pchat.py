@@ -14,36 +14,21 @@ def send_message(socket):
     socket.send(message)
     send_message(socket)
 
-def send_message_server():
+def send_message_server(nombre):
+    global SOCKET_LIST
     message = raw_input()
     try:
-            data = message
-            #Comprobar si se trata de un mensaje privado
-            if ':' in str(data):
-                recipient, msg = data.split(":")
-                print client.code + ": " + msg
-                for c in SOCKET_LIST:
-                     if c.code == recipient:
-                        if not c.socket.send(client.code + ": " + msg):
-                            try:
-                                c.socket.close()
-                            finally:
-                                SOCKET_LIST.remove(c)
-                                print "Cliente " + c.code + " no encontrado - Socket cerrado"
-                
+        data = message
+        # Hacemos un broadcast de lo que dice el cliente a todos los demás
+        # clientes
+        for c in SOCKET_LIST:
+            if not c.socket.send(nombre+ ": " + str(data)):
+                try:
+                    c.socket.close()
+                finally:
+                    SOCKET_LIST.remove(c)
+                    print "Cliente " + c.code + " no encontrado - Socket cerrado"
 
-            # Hacemos un broadcast de lo que dice el cliente a todos los demás
-            # clientes
-            print client.code + ": " + str(data)
-            for c in SOCKET_LIST:
-                if not c.socket.send(client.code + ": " + str(data)):
-                    try:
-                        c.socket.close()
-                    finally:
-                        SOCKET_LIST.remove(c)
-                        print "Cliente " + c.code + " no encontrado - Socket cerrado"
-
-            #print "Clientes totales: " + str(len(SOCKET_LIST))
 
     except Exception as e:
         print "Excepcion en socket de cliente:"
@@ -53,7 +38,8 @@ def send_message_server():
         finally:
             SOCKET_LIST.remove(client)
             print "Cliente " + client.code + " no encontrado - Socket cerrado - Clientes totales: " + str(len(SOCKET_LIST))
-    send_message(SOCKET_LIST)
+
+    send_message_server(nombre)
 
 
 class Client:
@@ -68,21 +54,6 @@ def manager(client):
 
         try:
             data = client.socket.recv(RECV_BUFFER)
-            #Comprobar si se trata de un mensaje privado
-            if ':' in str(data):
-                recipient, msg = data.split(":")
-                print client.code + ": " + msg
-                for c in SOCKET_LIST:
-                     if c.code == recipient:
-                        if not c.socket.send(client.code + ": " + msg):
-                            try:
-                                c.socket.close()
-                            finally:
-                                SOCKET_LIST.remove(c)
-                                print "Cliente " + c.code + " no encontrado - Socket cerrado"
-                                break
-                break
-
             # Hacemos un broadcast de lo que dice el cliente a todos los demás
             # clientes
             print client.code + ": " + str(data)
@@ -94,8 +65,6 @@ def manager(client):
                         SOCKET_LIST.remove(c)
                         print "Cliente " + c.code + " no encontrado - Socket cerrado"
                         break
-
-            #print "Clientes totales: " + str(len(SOCKET_LIST))
 
         except Exception as e:
             print "Excepcion en socket de cliente:"
@@ -117,7 +86,7 @@ def client():
         server_socket.connect(addr)
     except:
         print 'No hay nadie conectado, usted es el primero en la red'
-        server()
+        server(nombre)
         return
 
     server_socket.send(nombre)
@@ -127,7 +96,7 @@ def client():
         data = server_socket.recv(RECV_BUFFER)
         print data
 
-def server():
+def server(nombre):
     global SOCKET_LIST
     server_addr = (HOST, PORT)
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -136,7 +105,7 @@ def server():
     server_socket.listen(10)
 
     #Hilo para manejar los mensajes del peer inicial
-    thread.start_new_thread(send_message_server, () )
+    thread.start_new_thread(send_message_server, (nombre,) )
 
     while 1:
         c = Client()
