@@ -9,7 +9,7 @@ import uuid
 HOST = '0.0.0.0'
 SOCKET_LIST = []
 RECV_BUFFER = 1024
-PORT = 9000
+PORT = 9001
 
 class Client:
     pass

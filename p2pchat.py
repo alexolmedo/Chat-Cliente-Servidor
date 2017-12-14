@@ -4,7 +4,7 @@ import socket
 import time
 import thread
 
-HOST = '127.0.0.1'
+HOST = '0.0.0.0'
 SOCKET_LIST = []
 RECV_BUFFER = 1024
 PORT = 9001
@@ -81,14 +81,17 @@ def client():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     nombre=raw_input("Ingrese su nombre:")
     try: 
-        for i in range (128,254):
+        for i in range (99,127):
             try: 
-                addr = ("'172.31.103."+str(i)+"'", PORT)
-                server_socket.connect(addr)
-                break
+                addr = ('172.31.103.'+str(i), PORT)
+                #addr = ('172.31.103.101', PORT)
+                print addr
+                if server_socket.connect(addr):
+                    print "Exito"
+                    break
+                
             except:
                 pass
-        server_socket.connect(addr)
         
     except:
         print 'No hay nadie conectado, usted es el primero en la red'

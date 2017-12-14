@@ -6,7 +6,7 @@ import thread
 
 HOST = '127.0.0.1'
 RECV_BUFFER = 1024
-PORT = 9000
+PORT = 9001
 
 def send_message(socket):
     message = raw_input()
