@@ -78,12 +78,18 @@ def manager(client):
     return
 
 def client():
-    addr = (HOST, PORT)
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #server_socket.settimeout(30)
     nombre=raw_input("Ingrese su nombre:")
     try: 
+        for i in range (128,254):
+            try: 
+                addr = ("'172.31.103."+str(i)+"'", PORT)
+                server_socket.connect(addr)
+                break
+            except:
+                pass
         server_socket.connect(addr)
+        
     except:
         print 'No hay nadie conectado, usted es el primero en la red'
         server(nombre)
